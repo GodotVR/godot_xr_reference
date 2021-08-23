@@ -1,0 +1,4 @@
+# these are vscode project files, but we do keep the tasks.json one in that might be useful for people
+*
+!.gitignore
+!tasks.json
