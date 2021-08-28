@@ -13,8 +13,8 @@
 using namespace godot;
 
 void register_types() {
-    UtilityFunctions::print("Hello register types!");
-    
+	// UtilityFunctions::print("Hello register types!");
+	
 	ClassDB::register_class<XRInterfaceReference>();
 }
 

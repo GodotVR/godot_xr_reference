@@ -1,6 +1,22 @@
-[gd_scene load_steps=2 format=3 uid="uid://c4inay0af44y5"]
+[gd_scene load_steps=9 format=3 uid="uid://c4inay0af44y5"]
 
 [ext_resource type="Script" path="res://Main.gd" id="1_86b4p"]
+[ext_resource type="Material" path="res://assets/wahooney.itch.io/blue_grid.tres" id="2_hf54b"]
+[ext_resource type="Material" path="res://assets/wahooney.itch.io/green_grid.tres" id="3_kb4h0"]
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_aaq4s"]
+
+[sub_resource type="Sky" id="Sky_isho0"]
+sky_material = SubResource( "PhysicalSkyMaterial_aaq4s" )
+
+[sub_resource type="Environment" id="Environment_nkj1m"]
+background_mode = 2
+sky = SubResource( "Sky_isho0" )
+
+[sub_resource type="BoxMesh" id="BoxMesh_8mt8t"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_f4jca"]
+size = Vector2(1000, 1000)
 
 [node name="Main" type="Node3D"]
 script = ExtResource( "1_86b4p" )
@@ -9,4 +25,24 @@ script = ExtResource( "1_86b4p" )
 script = null
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+script = null
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.760915, -0.456129, 0.461471, 0.0679668, 0.76333, 0.642423, -0.645282, -0.457465, 0.611831, 0.404205, 2.29081, 0)
+script = null
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( "Environment_nkj1m" )
+script = null
+
+[node name="Cube" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.80584, 1, -5.83298)
+mesh = SubResource( "BoxMesh_8mt8t" )
+surface_material_override/0 = ExtResource( "2_hf54b" )
+script = null
+
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource( "PlaneMesh_f4jca" )
+surface_material_override/0 = ExtResource( "3_kb4h0" )
 script = null
