@@ -22,7 +22,6 @@ func _ready():
 	
 	# and this is our real init, but we skip find_interface due to our get_name bug
 	var xr_interface = XRServer.find_interface("XR Reference")
-	# var xr_interface = XRServer.find_interface("Native mobile")
 	if xr_interface:
 		print("Found " + str(xr_interface.get_name()))
 		if xr_interface.initialize():

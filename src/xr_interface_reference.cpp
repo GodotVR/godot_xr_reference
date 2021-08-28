@@ -279,7 +279,7 @@ PackedFloat64Array XRInterfaceReference::_get_projection_for_view(int64_t p_view
 	return arr;
 }
 
-void XRInterfaceReference::_commit_views(RID p_render_target, const Rect2 &p_screen_rect) {
+void XRInterfaceReference::_commit_views(const RID &p_render_target, const Rect2 &p_screen_rect) {
 	Rect2 rect = p_screen_rect;
 
 	// halve our width
