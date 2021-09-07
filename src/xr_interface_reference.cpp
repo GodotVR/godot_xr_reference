@@ -156,11 +156,8 @@ Vector2 XRInterfaceReference::_get_render_target_size() {
 	}
 	Vector2 target_size = display_server->window_get_size();
 
-	// target_size.x *= 0.5 * oversample;
-	// target_size.y *= oversample;
-
-	target_size.set_x(target_size.get_x() * 0.5 * oversample);
-	target_size.set_y(target_size.get_y() * oversample);
+	target_size.x = target_size.x * 0.5 * oversample;
+	target_size.y = target_size.y * oversample;
 
 	return target_size;
 }
@@ -177,11 +174,8 @@ Transform3D XRInterfaceReference::_get_camera_transform() {
 	Transform3D hmd_transform;
 	double world_scale = xr_server->get_world_scale();
 
-	// hmd_transform.origin.y = eye_height * world_scale;
+	hmd_transform.origin.y = eye_height * world_scale;
 
-	Vector3 origin(0.0, eye_height * world_scale, 0.0);
-	hmd_transform.set_origin(origin);
-	
 	return xr_server->get_reference_frame() * hmd_transform;
 }
 
@@ -194,20 +188,12 @@ Transform3D XRInterfaceReference::_get_transform_for_view(int64_t p_view, const 
 	double world_scale = xr_server->get_world_scale();
 
 	if (p_view == 0) {
-		// eye_transform.origin.x = -(intraocular_dist * 0.01 * 0.5 * world_scale);
-		Vector3 origin(-(intraocular_dist * 0.01 * 0.5 * world_scale), 0.0, 0.0);
-		eye_transform.set_origin(origin);
+		eye_transform.origin.x = -(intraocular_dist * 0.01 * 0.5 * world_scale);
 	} else if (p_view == 1) {
-		// eye_transform.origin.x = intraocular_dist * 0.01 * 0.5 * world_scale;
-		Vector3 origin(intraocular_dist * 0.01 * 0.5 * world_scale, 0.0, 0.0);
-		eye_transform.set_origin(origin);
+		eye_transform.origin.x = intraocular_dist * 0.01 * 0.5 * world_scale;
 	}
 
-	// hmd_transform.origin.y = eye_height * world_scale;
-	{
-		Vector3 origin(0.0, eye_height * world_scale, 0.0);
-		hmd_transform.set_origin(origin);
-	}
+	hmd_transform.origin.y = eye_height * world_scale;
 
 	return p_cam_transform * xr_server->get_reference_frame() * hmd_transform * eye_transform;
 }
@@ -284,8 +270,8 @@ void XRInterfaceReference::_commit_views(const RID &p_render_target, const Rect2
 
 	// halve our width
 	Vector2 size = rect.get_size();
-	size.set_x(size.get_x() * 0.5);
-	rect.set_size(size);
+	size.x = size.x * 0.5;
+	rect.size = size;
 
 	Vector2 eye_center(((-intraocular_dist / 2.0) + (display_width / 4.0)) / (display_width / 2.0), 0.0);
 
@@ -293,10 +279,10 @@ void XRInterfaceReference::_commit_views(const RID &p_render_target, const Rect2
 
 	// move rect
 	Vector2 pos = rect.get_position();
-	pos.set_x(size.get_x());
-	rect.set_position(pos);
+	pos.x = size.x;
+	rect.position = pos;
 
-	eye_center.set_x(((intraocular_dist / 2.0) - (display_width / 4.0)) / (display_width / 2.0));
+	eye_center.x = ((intraocular_dist / 2.0) - (display_width / 4.0)) / (display_width / 2.0);
 	add_blit(p_render_target, rect, true, 1, true, eye_center, k1, k2, oversample, aspect);
 }
 
