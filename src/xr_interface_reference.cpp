@@ -122,8 +122,7 @@ bool XRInterfaceReference::_initialize() {
 		// do any initialisation here.. 
 		xr_server = XRServer::get_singleton();
 		if (xr_server == nullptr) {
-			UtilityFunctions::printerr("Couldn't obtain XRServer singleton");
-			return false;
+			ERR_FAIL_V_MSG(false, "Couldn't obtain XRServer singleton");
 		}
 
 		xr_server->set_primary_interface(this);
@@ -266,24 +265,25 @@ PackedFloat64Array XRInterfaceReference::_get_projection_for_view(int64_t p_view
 }
 
 void XRInterfaceReference::_commit_views(const RID &p_render_target, const Rect2 &p_screen_rect) {
-	Rect2 rect = p_screen_rect;
+	Rect2 src_rect(0.0f, 0.0f, 1.0f, 1.0f);
+	Rect2 dst_rect = p_screen_rect;
 
 	// halve our width
-	Vector2 size = rect.get_size();
+	Vector2 size = dst_rect.get_size();
 	size.x = size.x * 0.5;
-	rect.size = size;
+	dst_rect.size = size;
 
 	Vector2 eye_center(((-intraocular_dist / 2.0) + (display_width / 4.0)) / (display_width / 2.0), 0.0);
 
-	add_blit(p_render_target, rect, true, 0, true, eye_center, k1, k2, oversample, aspect);
+	add_blit(p_render_target, src_rect, dst_rect, true, 0, true, eye_center, k1, k2, oversample, aspect);
 
 	// move rect
-	Vector2 pos = rect.get_position();
+	Vector2 pos = dst_rect.get_position();
 	pos.x = size.x;
-	rect.position = pos;
+	dst_rect.position = pos;
 
 	eye_center.x = ((intraocular_dist / 2.0) - (display_width / 4.0)) / (display_width / 2.0);
-	add_blit(p_render_target, rect, true, 1, true, eye_center, k1, k2, oversample, aspect);
+	add_blit(p_render_target, src_rect, dst_rect, true, 1, true, eye_center, k1, k2, oversample, aspect);
 }
 
 void XRInterfaceReference::_process() {
@@ -304,4 +304,12 @@ void XRInterfaceReference::_set_anchor_detection_is_enabled(bool enabled) {
 
 int64_t XRInterfaceReference::_get_camera_feed_id() const {
 	return 0;
+}
+
+XRInterfaceReference::XRInterfaceReference() {
+
+}
+
+XRInterfaceReference::~XRInterfaceReference() {
+
 }
