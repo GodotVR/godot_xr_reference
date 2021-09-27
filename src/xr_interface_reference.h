@@ -78,6 +78,9 @@ public:
 	virtual bool _get_anchor_detection_is_enabled() const override;
 	virtual void _set_anchor_detection_is_enabled(bool enabled) override;
 	virtual int64_t _get_camera_feed_id() const override;
+
+	XRInterfaceReference();
+	~XRInterfaceReference();
 };
 } // namespace godot
 

@@ -13,9 +13,14 @@
 using namespace godot;
 
 void register_types() {
-	// UtilityFunctions::print("Hello register types!");
-	
 	ClassDB::register_class<XRInterfaceReference>();
+
+	XRServer *xr_server = XRServer::get_singleton();
+	ERR_FAIL_NULL(xr_server);
+
+	Ref<XRInterfaceReference> interface;
+	interface.instantiate();
+	xr_server->add_interface(interface);
 }
 
 void unregister_types() {}
@@ -25,12 +30,11 @@ extern "C" {
 // Initialization.
 
 GDNativeBool GDN_EXPORT xrreference_library_init(const GDNativeInterface *p_interface, const GDNativeExtensionClassLibraryPtr p_library, GDNativeInitialization *r_initialization) {
-	GDNativeBool result = godot::GDExtensionBinding::init(p_interface, p_library, r_initialization);
+	godot::GDExtensionBinding::InitObject init_obj(p_interface, p_library, r_initialization);
 
-	if (result) {
-		register_types();
-	}
+	init_obj.register_driver_initializer(register_types);
+	init_obj.register_driver_terminator(unregister_types);
 
-	return result;
+	return init_obj.init();
 }
 }
