@@ -12,18 +12,33 @@
 
 using namespace godot;
 
+Ref<XRInterfaceReference> xr_interface_reference;
+
 void register_types() {
 	ClassDB::register_class<XRInterfaceReference>();
 
 	XRServer *xr_server = XRServer::get_singleton();
 	ERR_FAIL_NULL(xr_server);
 
-	Ref<XRInterfaceReference> interface;
-	interface.instantiate();
-	xr_server->add_interface(interface);
+	xr_interface_reference.instantiate();
+	xr_server->add_interface(xr_interface_reference);
 }
 
-void unregister_types() {}
+void unregister_types() {
+	if (xr_interface_reference.is_valid()) {
+		if (xr_interface_reference->is_initialized()) {
+			xr_interface_reference->uninitialize();
+		}
+
+		XRServer *xr_server = XRServer::get_singleton();
+		ERR_FAIL_NULL(xr_server);
+		xr_server->remove_interface(xr_interface_reference);
+
+		xr_interface_reference.unref();
+	}
+
+	// Note: our class will be unregistered automatically
+}
 
 extern "C" {
 
