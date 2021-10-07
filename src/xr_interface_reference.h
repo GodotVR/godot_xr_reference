@@ -5,6 +5,7 @@
 
 #include <godot_cpp/core/binder_common.hpp>
 #include <godot_cpp/classes/xr_server.hpp>
+#include <godot_cpp/classes/xr_positional_tracker.hpp>
 
 namespace godot {
 
@@ -28,6 +29,13 @@ private:
 	double k1 = 0.215;
 	double k2 = 0.215;
 	double aspect = 1.0;
+
+	Ref<XRPositionalTracker> head;
+	Transform3D head_transform;
+	bool use_mouse_for_headtracking = false;
+	bool use_wasd_for_movement = false;
+	double angle_x = 0.0;
+	double angle_y = 0.0;
 
 public:
 	// Constants.
@@ -53,6 +61,12 @@ public:
 
 	double get_k2() const;
 	void set_k2(const double p_k2);
+
+	bool get_use_mouse_for_headtracking() const;
+	void set_use_mouse_for_headtracking(bool p_use_mouse_for_headtracking);
+
+	bool get_use_wasd_for_movement() const;
+	void set_use_wasd_for_movement(bool p_use_wasd_for_movement);
 
 	// Functions.
 	virtual StringName _get_name() const override;

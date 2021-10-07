@@ -3,6 +3,7 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/variant/utility_functions.hpp>
 #include <godot_cpp/classes/display_server.hpp>
+#include <godot_cpp/classes/input.hpp>
 
 using namespace godot;
 
@@ -38,6 +39,14 @@ void XRInterfaceReference::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_k2"), &XRInterfaceReference::get_k2);
 	ClassDB::bind_method(D_METHOD("set_k2", "k2"), &XRInterfaceReference::set_k2);
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "k2"), "set_k2", "get_k2");
+
+	ClassDB::bind_method(D_METHOD("get_use_mouse_for_headtracking"), &XRInterfaceReference::get_use_mouse_for_headtracking);
+	ClassDB::bind_method(D_METHOD("set_use_mouse_for_headtracking", "use_mouse_for_headtracking"), &XRInterfaceReference::set_use_mouse_for_headtracking);
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_mouse_for_headtracking"), "set_use_mouse_for_headtracking", "get_use_mouse_for_headtracking");
+
+	ClassDB::bind_method(D_METHOD("get_use_wasd_for_movement"), &XRInterfaceReference::get_use_wasd_for_movement);
+	ClassDB::bind_method(D_METHOD("set_use_wasd_for_movement", "use_wasd_for_movement"), &XRInterfaceReference::set_use_wasd_for_movement);
+	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_wasd_for_movement"), "set_use_wasd_for_movement", "get_use_wasd_for_movement");
 
 	// Signals.
 	// ADD_SIGNAL(MethodInfo("custom_signal", PropertyInfo(Variant::STRING, "name"), PropertyInfo(Variant::INT, "value")));
@@ -103,6 +112,23 @@ void XRInterfaceReference::set_k2(const double p_k2) {
 	k2 = p_k2;
 }
 
+bool XRInterfaceReference::get_use_mouse_for_headtracking() const {
+	return use_mouse_for_headtracking;
+}
+
+void XRInterfaceReference::set_use_mouse_for_headtracking(bool p_use_mouse_for_headtracking) {
+	use_mouse_for_headtracking = p_use_mouse_for_headtracking;
+}
+
+bool XRInterfaceReference::get_use_wasd_for_movement() const {
+	return use_wasd_for_movement;
+}
+
+void XRInterfaceReference::set_use_wasd_for_movement(bool p_use_wasd_for_movement) {
+	use_wasd_for_movement = p_use_wasd_for_movement;
+}
+
+
 StringName XRInterfaceReference::_get_name() const {
 	// this currently fails to return because we loose our data before it ends up in the callers hands...
 	StringName name("XR Reference");
@@ -125,6 +151,14 @@ bool XRInterfaceReference::_initialize() {
 			ERR_FAIL_V_MSG(false, "Couldn't obtain XRServer singleton");
 		}
 
+		// we must create a tracker for our head
+		head.instantiate();
+		head->set_tracker_type(XRServer::TRACKER_HEAD);
+		head->set_tracker_name("head");
+		head->set_tracker_desc("Players head");
+		xr_server->add_tracker(head);
+
+		// set this as our primary interface
 		xr_server->set_primary_interface(this);
 
 		initialised = true;
@@ -135,6 +169,11 @@ bool XRInterfaceReference::_initialize() {
 void XRInterfaceReference::_uninitialize() {
 	if (initialised) {
 		// do any cleanup here...
+		if (head.is_valid()) {
+			xr_server->remove_tracker(head);
+
+			head.unref();
+		}
 
 		initialised = false;
 		xr_server = nullptr;
@@ -170,12 +209,12 @@ Transform3D XRInterfaceReference::_get_camera_transform() {
 		return Transform3D();
 	}
 
-	Transform3D hmd_transform;
+	Transform3D adj_head_transform = head_transform;
 	double world_scale = xr_server->get_world_scale();
 
-	hmd_transform.origin.y = eye_height * world_scale;
+	adj_head_transform.origin *= world_scale;
 
-	return xr_server->get_reference_frame() * hmd_transform;
+	return xr_server->get_reference_frame() * adj_head_transform;
 }
 
 Transform3D XRInterfaceReference::_get_transform_for_view(int64_t p_view, const Transform3D &p_cam_transform) {
@@ -183,7 +222,7 @@ Transform3D XRInterfaceReference::_get_transform_for_view(int64_t p_view, const 
 		return Transform3D();
 	}
 
-	Transform3D hmd_transform, eye_transform;
+	Transform3D eye_transform;
 	double world_scale = xr_server->get_world_scale();
 
 	if (p_view == 0) {
@@ -192,9 +231,10 @@ Transform3D XRInterfaceReference::_get_transform_for_view(int64_t p_view, const 
 		eye_transform.origin.x = intraocular_dist * 0.01 * 0.5 * world_scale;
 	}
 
-	hmd_transform.origin.y = eye_height * world_scale;
+	Transform3D adj_head_transform = head_transform;
+	adj_head_transform.origin *= world_scale;
 
-	return p_cam_transform * xr_server->get_reference_frame() * hmd_transform * eye_transform;
+	return p_cam_transform * xr_server->get_reference_frame() * adj_head_transform * eye_transform;
 }
 
 PackedFloat64Array XRInterfaceReference::_get_projection_for_view(int64_t p_view, double p_aspect, double p_z_near, double p_z_far) {
@@ -287,7 +327,65 @@ void XRInterfaceReference::_commit_views(const RID &p_render_target, const Rect2
 }
 
 void XRInterfaceReference::_process() {
+	// Emulate a headsets movement through space, we thus update the position and orientation relative to the origin point
 
+	// update our head transform in world space
+	if (use_mouse_for_headtracking) {
+		Vector2 mouse_speed =  Input::get_singleton()->get_last_mouse_speed();
+
+		// we're missing a delta here so frame rate sensative
+		double fps = 90.0;
+		angle_x -= mouse_speed.x / fps;
+		angle_y -= mouse_speed.y / fps;
+		if (angle_y < -90.0) {
+			angle_y = -90.0;
+		} else if (angle_y >= 90.0) {
+			angle_y = 90.0;
+		}
+
+		Basis basis;
+		basis.rotate(Vector3(1.0, 0.0, 0.0), 3.14159265359 * angle_y/ 180);
+		basis.rotate(Vector3(0.0, 1.0, 0.0), 3.14159265359 * angle_x/ 180);
+
+		head_transform.basis = basis;
+	}
+
+	// move our head through space
+	if (use_wasd_for_movement) {
+		// get our movement vectors
+		Vector3 forward = -head_transform.basis.get_column(2); // might need to be get_column
+		Vector3 sideways = head_transform.basis.get_column(0);
+
+		forward.y = 0.0;
+		forward.normalize();
+
+		sideways.y = 0.0;
+		sideways.normalize();
+
+		// we're missing a delta here so frame rate sensative
+		double fps = 90.0;
+		double speed = 5.0;
+
+		Input * input = Input::get_singleton();
+		if (input->is_key_pressed(KEY_W)) {
+			head_transform.origin += speed * forward / fps;
+		} else if (input->is_key_pressed(KEY_S)) {
+			head_transform.origin -= speed * forward / fps;
+		}
+		if (input->is_key_pressed(KEY_D)) {
+			head_transform.origin += speed * sideways / fps;
+		} else if (input->is_key_pressed(KEY_A)) {
+			head_transform.origin -= speed * sideways / fps;
+		}
+	}
+
+	// set height
+	head_transform.origin.y = eye_height;
+
+	if (head.is_valid()) {
+		// Set our head position, note in real space, reference frame and world scale is applied later
+		head->set_pose("default", head_transform, Vector3(), Vector3());
+	}
 }
 
 void XRInterfaceReference::_notification(int64_t what) {
