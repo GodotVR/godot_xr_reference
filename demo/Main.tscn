@@ -1,27 +1,18 @@
-[gd_scene load_steps=12 format=3 uid="uid://c4inay0af44y5"]
+[gd_scene load_steps=10 format=3 uid="uid://c4inay0af44y5"]
 
 [ext_resource type="Script" path="res://Main.gd" id="1_86b4p"]
 [ext_resource type="Script" path="res://Hud.gd" id="2_bnd5b"]
 [ext_resource type="Material" path="res://assets/wahooney.itch.io/blue_grid.tres" id="2_hf54b"]
 [ext_resource type="Material" path="res://assets/wahooney.itch.io/green_grid.tres" id="3_kb4h0"]
 
-[sub_resource type="QuadMesh" id="QuadMesh_pvppo"]
-size = Vector2(0.2, 0.1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ck3l5"]
-resource_local_to_scene = true
-transparency = 1
-no_depth_test = true
-shading_mode = 0
-
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_aaq4s"]
 
 [sub_resource type="Sky" id="Sky_isho0"]
-sky_material = SubResource( "PhysicalSkyMaterial_aaq4s" )
+sky_material = SubResource("PhysicalSkyMaterial_aaq4s")
 
 [sub_resource type="Environment" id="Environment_nkj1m"]
 background_mode = 2
-sky = SubResource( "Sky_isho0" )
+sky = SubResource("Sky_isho0")
 
 [sub_resource type="BoxMesh" id="BoxMesh_8mt8t"]
 
@@ -29,57 +20,35 @@ sky = SubResource( "Sky_isho0" )
 size = Vector2(1000, 1000)
 
 [node name="Main" type="Node3D"]
-script = ExtResource( "1_86b4p" )
+script = ExtResource("1_86b4p")
 
 [node name="XROrigin3D" type="XROrigin3D" parent="."]
-script = null
 
 [node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
-script = null
 
 [node name="Hud" type="Node3D" parent="XROrigin3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
-script = ExtResource( "2_bnd5b" )
+script = ExtResource("2_bnd5b")
 camera = NodePath("../XRCamera3D")
 
-[node name="FPSViewport" type="SubViewport" parent="XROrigin3D/Hud"]
-disable_3d = true
-transparent_bg = true
-size = Vector2i(300, 150)
-render_target_update_mode = 3
-script = null
-
-[node name="FPS" type="Label" parent="XROrigin3D/Hud/FPSViewport"]
-offset_right = 40.0
-offset_bottom = 23.0
-theme_override_font_sizes/font_size = 72
-text = "FPS: 0"
-structured_text_bidi_override_options = []
-script = null
-
-[node name="Display" type="MeshInstance3D" parent="XROrigin3D/Hud"]
-transform = Transform3D(0.85828, 0, 0.513182, 0, 1, 0, -0.513182, 0, 0.85828, -0.493988, 0.307667, -0.697151)
-mesh = SubResource( "QuadMesh_pvppo" )
-skeleton = NodePath("../../XRCamera3D")
-surface_material_override/0 = SubResource( "StandardMaterial3D_ck3l5" )
-script = null
+[node name="FPS" type="Label3D" parent="XROrigin3D/Hud"]
+transform = Transform3D(0.85828, 0, 0.513182, 0, 1, 0, -0.513182, 0, 0.85828, -0.491584, 0.307667, -0.697151)
+text = "FPS: 000"
+font_size = 16
+outline_size = 6
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.760915, -0.456129, 0.461471, 0.0679668, 0.76333, 0.642423, -0.645282, -0.457465, 0.611831, 0.404205, 2.29081, 0)
-script = null
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( "Environment_nkj1m" )
-script = null
+environment = SubResource("Environment_nkj1m")
 
 [node name="Cube" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.80584, 1, -5.83298)
-mesh = SubResource( "BoxMesh_8mt8t" )
-surface_material_override/0 = ExtResource( "2_hf54b" )
-script = null
+mesh = SubResource("BoxMesh_8mt8t")
+surface_material_override/0 = ExtResource("2_hf54b")
 
 [node name="Ground" type="MeshInstance3D" parent="."]
-mesh = SubResource( "PlaneMesh_f4jca" )
-surface_material_override/0 = ExtResource( "3_kb4h0" )
-script = null
+mesh = SubResource("PlaneMesh_f4jca")
+surface_material_override/0 = ExtResource("3_kb4h0")

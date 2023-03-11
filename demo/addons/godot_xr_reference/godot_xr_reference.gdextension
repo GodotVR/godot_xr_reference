@@ -4,5 +4,7 @@ entry_symbol = "xrreference_library_init"
 
 [libraries]
 
-linux.64 = "bin/x11/libgdxrreference.so"
-windows.64 = "bin/win64/libgdxrreference.dll"
+windows.debug.x86_64 = "res://addons/godot_xr_reference/bin/libgdxrreference.windows.template_debug.x86_64.dll"
+windows.release.x86_64 = "res://addons/godot_xr_reference/bin/libgdxrreference.windows.template_release.x86_64.dll"
+linux.debug.x86_64 = "res://addons/godot_xr_reference/bin/libgdxrreference.linux.template_debug.x86_64.so"
+linux.release.x86_64 = "res://addons/godot_xr_reference/bin/libgdxrreference.linux.template_release.x86_64.so"

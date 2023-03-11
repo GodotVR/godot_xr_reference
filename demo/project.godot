@@ -6,13 +6,22 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
+config_version=5
 
 [application]
 
 config/name="Godot XR Reference demo"
 run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.1")
 config/icon="res://icon.png"
+
+[autoload]
+
+XRReferenceInterface="*res://addons/godot_xr_reference/godot_xr_reference.gd"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_xr_reference/plugin.cfg")
 
 [native_extensions]
 
@@ -20,6 +29,10 @@ paths=["res://addons/godot_xr_reference/godot_xr_reference.gdextension"]
 
 [rendering]
 
+environment/defaults/default_environment="res://default_env.tres"
 vulkan/rendering/back_end=1
 xr/enabled=true
-environment/defaults/default_environment="res://default_env.tres"
+
+[xr]
+
+shaders/enabled=true
