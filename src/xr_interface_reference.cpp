@@ -135,7 +135,7 @@ StringName XRInterfaceReference::_get_name() const {
 	return name;
 }
 
-int64_t XRInterfaceReference::_get_capabilities() const {
+uint32_t XRInterfaceReference::_get_capabilities() const {
 	return XR_STEREO;
 }
 
@@ -180,7 +180,7 @@ void XRInterfaceReference::_uninitialize() {
 	}
 }
 
-int64_t XRInterfaceReference::_get_tracking_status() const {
+XRInterface::TrackingStatus XRInterfaceReference::_get_tracking_status() const {
 	return XRInterface::XR_UNKNOWN_TRACKING;
 }
 
@@ -200,7 +200,7 @@ Vector2 XRInterfaceReference::_get_render_target_size() {
 	return target_size;
 }
 
-int64_t XRInterfaceReference::_get_view_count() {
+uint32_t XRInterfaceReference::_get_view_count() {
 	return 2; // stereo
 }
 
@@ -217,7 +217,7 @@ Transform3D XRInterfaceReference::_get_camera_transform() {
 	return xr_server->get_reference_frame() * adj_head_transform;
 }
 
-Transform3D XRInterfaceReference::_get_transform_for_view(int64_t p_view, const Transform3D &p_cam_transform) {
+Transform3D XRInterfaceReference::_get_transform_for_view(uint32_t p_view, const Transform3D &p_cam_transform) {
 	if (!initialised) {
 		return Transform3D();
 	}
@@ -237,7 +237,7 @@ Transform3D XRInterfaceReference::_get_transform_for_view(int64_t p_view, const 
 	return p_cam_transform * xr_server->get_reference_frame() * adj_head_transform * eye_transform;
 }
 
-PackedFloat64Array XRInterfaceReference::_get_projection_for_view(int64_t p_view, double p_aspect, double p_z_near, double p_z_far) {
+PackedFloat64Array XRInterfaceReference::_get_projection_for_view(uint32_t p_view, double p_aspect, double p_z_near, double p_z_far) {
 	PackedFloat64Array arr;
 	arr.resize(16); // 4x4 matrix
 
@@ -304,7 +304,7 @@ PackedFloat64Array XRInterfaceReference::_get_projection_for_view(int64_t p_view
 	return arr;
 }
 
-void XRInterfaceReference::_commit_views(const RID &p_render_target, const Rect2 &p_screen_rect) {
+void XRInterfaceReference::_post_draw_viewport(const RID &p_render_target, const Rect2 &p_screen_rect) {
 	Rect2 src_rect(0.0f, 0.0f, 1.0f, 1.0f);
 	Rect2 dst_rect = p_screen_rect;
 
@@ -331,7 +331,7 @@ void XRInterfaceReference::_process() {
 
 	// update our head transform in world space
 	if (use_mouse_for_headtracking) {
-		Vector2 mouse_speed =  Input::get_singleton()->get_last_mouse_speed();
+		Vector2 mouse_speed =  Input::get_singleton()->get_last_mouse_velocity();
 
 		// we're missing a delta here so frame rate sensative
 		double fps = 90.0;
@@ -384,14 +384,10 @@ void XRInterfaceReference::_process() {
 
 	if (head.is_valid()) {
 		// Set our head position, note in real space, reference frame and world scale is applied later
-		head->set_pose("default", head_transform, Vector3(), Vector3());
+		head->set_pose("default", head_transform, Vector3(), Vector3(), XRPose::XR_TRACKING_CONFIDENCE_HIGH);
 	}
 }
 
-void XRInterfaceReference::_notification(int64_t what) {
-
-}
-	
 bool XRInterfaceReference::_get_anchor_detection_is_enabled() const {
 	return false;
 }
@@ -400,7 +396,7 @@ void XRInterfaceReference::_set_anchor_detection_is_enabled(bool enabled) {
 
 }
 
-int64_t XRInterfaceReference::_get_camera_feed_id() const {
+int32_t XRInterfaceReference::_get_camera_feed_id() const {
 	return 0;
 }
 

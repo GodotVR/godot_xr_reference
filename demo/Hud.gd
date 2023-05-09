@@ -2,12 +2,7 @@ extends Node3D
 
 @export var camera : NodePath
 
-func _ready():
-	var material : StandardMaterial3D = $Display.get_surface_override_material(0)
-	if material:
-		material.albedo_texture = $FPSViewport.get_texture()
-
-func _process(delta):
+func _process(_delta):
 	if camera:
 		var camera_node : XRCamera3D = get_node(camera)
 		
@@ -22,4 +17,4 @@ func _process(delta):
 			look_at(t.origin + forward)
 
 	var fps = Performance.get_monitor(Performance.TIME_FPS)
-	$FPSViewport/FPS.text = "FPS: " + str(fps)
+	$FPS.text = "FPS: " + str(fps)
