@@ -1,7 +1,5 @@
 extends Node3D
 
-var xr_interface : XRInterfaceReference
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	XRReferenceInterface.start_xr()
