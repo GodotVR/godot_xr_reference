@@ -36,6 +36,7 @@ private:
 	bool use_wasd_for_movement = false;
 	double angle_x = 0.0;
 	double angle_y = 0.0;
+	Rect2 screen = Rect2(0.0f,0.0f,1.0f,1.0f);
 
 public:
 	// Constants.
@@ -67,6 +68,9 @@ public:
 
 	bool get_use_wasd_for_movement() const;
 	void set_use_wasd_for_movement(bool p_use_wasd_for_movement);
+
+	Rect2 get_screen_size() const;
+	void set_screen_size(const Rect2 screen_size);
 
 	// Functions.
 	virtual StringName _get_name() const override;
