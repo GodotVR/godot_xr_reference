@@ -48,6 +48,10 @@ void XRInterfaceReference::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_use_wasd_for_movement", "use_wasd_for_movement"), &XRInterfaceReference::set_use_wasd_for_movement);
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_wasd_for_movement"), "set_use_wasd_for_movement", "get_use_wasd_for_movement");
 
+	ClassDB::bind_method(D_METHOD("get_screen_size"), &XRInterfaceReference::get_screen_size);
+	ClassDB::bind_method(D_METHOD("set_screen_size", "screen_size"), &XRInterfaceReference::set_screen_size);
+	ADD_PROPERTY(PropertyInfo(Variant::RECT2, "screen_size"), "set_screen_size", "get_screen_size");
+
 	// Signals.
 	// ADD_SIGNAL(MethodInfo("custom_signal", PropertyInfo(Variant::STRING, "name"), PropertyInfo(Variant::INT, "value")));
 	// ClassDB::bind_method(D_METHOD("emit_custom_signal", "name", "value"), &Example::emit_custom_signal);
@@ -114,6 +118,14 @@ void XRInterfaceReference::set_k2(const double p_k2) {
 
 bool XRInterfaceReference::get_use_mouse_for_headtracking() const {
 	return use_mouse_for_headtracking;
+}
+
+Rect2 XRInterfaceReference::get_screen_size() const {
+	return screen;
+}
+
+void XRInterfaceReference::set_screen_size(const Rect2 screen_size) {
+	screen = screen_size;
 }
 
 void XRInterfaceReference::set_use_mouse_for_headtracking(bool p_use_mouse_for_headtracking) {
@@ -306,7 +318,11 @@ PackedFloat64Array XRInterfaceReference::_get_projection_for_view(uint32_t p_vie
 
 void XRInterfaceReference::_post_draw_viewport(const RID &p_render_target, const Rect2 &p_screen_rect) {
 	Rect2 src_rect(0.0f, 0.0f, 1.0f, 1.0f);
-	Rect2 dst_rect = p_screen_rect;
+	Rect2 dst_rect = Rect2(
+		p_screen_rect.position.x+p_screen_rect.size.x*screen.position.x,
+		p_screen_rect.position.y+p_screen_rect.size.y*screen.position.y,
+		p_screen_rect.size.x*screen.size.x,
+		p_screen_rect.size.y*screen.size.y);
 
 	// halve our width
 	Vector2 size = dst_rect.get_size();
@@ -319,7 +335,7 @@ void XRInterfaceReference::_post_draw_viewport(const RID &p_render_target, const
 
 	// move rect
 	Vector2 pos = dst_rect.get_position();
-	pos.x = size.x;
+	pos.x += size.x;
 	dst_rect.position = pos;
 
 	eye_center.x = ((intraocular_dist / 2.0) - (display_width / 4.0)) / (display_width / 2.0);
